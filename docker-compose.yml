@@ -10,8 +10,10 @@ services:
       - "3334:3306"
     volumes:
       - myVolume:/var/lib/mysql
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: world
 
 volumes:
   myVolume:

@@ -1,4 +1,4 @@
-package com.javarush.dao;
+package com.javarush.repositories;
 
 import com.javarush.domain.City;
 import org.hibernate.SessionFactory;
@@ -6,10 +6,10 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 
-public class CityDAO {
+public class CityRepository {
     private final SessionFactory sessionFactory;
 
-    public CityDAO(SessionFactory sessionFactory) {
+    public CityRepository(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 

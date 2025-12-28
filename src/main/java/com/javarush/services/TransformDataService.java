@@ -16,27 +16,27 @@ public class TransformDataService {
     }
 
     private CityCountry convertToCityCountry(City city) {
-        CityCountry res = new CityCountry();
-        res.setId(city.getId());
-        res.setName(city.getName());
-        res.setPopulation(city.getPopulation());
-        res.setDistrict(city.getDistrict());
+        CityCountry cityCountry = new CityCountry();
+        cityCountry.setId(city.getId());
+        cityCountry.setName(city.getName());
+        cityCountry.setPopulation(city.getPopulation());
+        cityCountry.setDistrict(city.getDistrict());
 
         Country country = city.getCountry();
-        res.setAlternativeCountryCode(country.getAlternativeCode());
-        res.setContinent(country.getContinent());
-        res.setCountryCode(country.getCode());
-        res.setCountryName(country.getName());
-        res.setCountryPopulation(country.getPopulation());
-        res.setCountryRegion(country.getRegion());
-        res.setCountrySurfaceArea(country.getSurfaceArea());
+        cityCountry.setAlternativeCountryCode(country.getAlternativeCode());
+        cityCountry.setContinent(country.getContinent());
+        cityCountry.setCountryCode(country.getCode());
+        cityCountry.setCountryName(country.getName());
+        cityCountry.setCountryPopulation(country.getPopulation());
+        cityCountry.setCountryRegion(country.getRegion());
+        cityCountry.setCountrySurfaceArea(country.getSurfaceArea());
 
         Set<Language> languages = country.getLanguages().stream()
                 .map(this::convertToLanguage)
                 .collect(Collectors.toSet());
-        res.setLanguages(languages);
+        cityCountry.setLanguages(languages);
 
-        return res;
+        return cityCountry;
     }
 
     private Language convertToLanguage(CountryLanguage cl) {

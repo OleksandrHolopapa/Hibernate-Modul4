@@ -77,7 +77,7 @@ class RunnerTest extends AbstractHibernateTest {
         verify(cityRepository).getItems(0, 500);
         verify(dataTransformService).transformData(anyList());
         verify(redisService).pushToRedis(transformedData);
-        verify(redisService).testRedisData(anyList()); // перевірка виклику тесту продуктивності Redis
+        verify(redisService).testRedisData(anyList());
         verify(redisService).shutdown();
     }
 

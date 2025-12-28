@@ -17,8 +17,8 @@ public class RedisService {
     private final ObjectMapper mapper;
     private final Logger logger = LoggerFactory.getLogger(RedisService.class);
 
-    public RedisService() {
-        redisClient = RedisClient.create(RedisURI.create("localhost", 6379));
+    public RedisService(RedisClient redisClient) {
+        this.redisClient = redisClient;
         mapper = new ObjectMapper();
         try (StatefulRedisConnection<String, String> connection = redisClient.connect()) {
             System.out.println("\nConnected to Redis\n");

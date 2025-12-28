@@ -7,6 +7,8 @@ import com.javarush.domain.CountryLanguage;
 import com.javarush.redis.CityCountry;
 import com.javarush.services.TransformDataService;
 import com.javarush.services.RedisService;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -19,20 +21,30 @@ public class Runner {
     private final RedisService redisService;
     private final TransformDataService dataTransformService;
     private final CityRepository cityRepository;
+    private final boolean isSessionFactoryOwned;
+
 
     public Runner() {
         sessionFactory = SessionFactoryConfig.prepareRelationalDb();
-        redisService = new RedisService();
+        redisService = new RedisService(RedisClient.create(RedisURI.create("localhost", 6379)));
         dataTransformService = new TransformDataService();
         cityRepository = new CityRepository(sessionFactory);
+        this.isSessionFactoryOwned = true;
+    }
+
+    public Runner(SessionFactory sessionFactory, RedisService redisService,
+                  TransformDataService dataTransformService, CityRepository cityRepository) {
+        this.sessionFactory = sessionFactory;
+        this.redisService = redisService;
+        this.dataTransformService = dataTransformService;
+        this.cityRepository = cityRepository;
+        this.isSessionFactoryOwned = false;
     }
 
     public void run() {
         List<City> allCities = fetchData();
         List<CityCountry> preparedData = dataTransformService.transformData(allCities);
         redisService.pushToRedis(preparedData);
-
-        sessionFactory.getCurrentSession().close();
 
         List<Integer> ids = List.of(3, 2545, 123, 4, 189, 89, 3458, 1189, 10, 102);
 
@@ -79,7 +91,7 @@ public class Runner {
     }
 
     private void shutdown() {
-        if (sessionFactory != null) {
+        if (isSessionFactoryOwned && sessionFactory != null) {
             sessionFactory.close();
         }
         redisService.shutdown();

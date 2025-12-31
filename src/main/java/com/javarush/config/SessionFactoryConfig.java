@@ -1,31 +1,44 @@
 package com.javarush.config;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
 import com.javarush.domain.City;
 import com.javarush.domain.Country;
 import com.javarush.domain.CountryLanguage;
+import com.javarush.exceptions.ConfigException;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class SessionFactoryConfig {
-    public static SessionFactory prepareRelationalDb() {
-        Properties properties = new Properties();
-        properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL8Dialect");
-        properties.put(Environment.DRIVER, "com.p6spy.engine.spy.P6SpyDriver");
-        properties.put(Environment.URL, "jdbc:p6spy:mysql://localhost:3334/world");
-        properties.put(Environment.USER, "root");
-        properties.put(Environment.PASS, "123456");
-        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-        properties.put(Environment.HBM2DDL_AUTO, "validate");
-        properties.put(Environment.STATEMENT_BATCH_SIZE, "100");
+    private final Configuration configuration;
+    private static final Logger logger = LoggerFactory.getLogger(SessionFactoryConfig.class);
 
-        return new Configuration()
+    public SessionFactoryConfig(String propertiesFileName) {
+        Properties properties = new Properties();
+
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propertiesFileName)) {
+            if (inputStream == null) {
+                logger.error("Property file {} not found", propertiesFileName);
+                throw new ConfigException("Property file not found: " + propertiesFileName);
+            }
+            properties.load(inputStream);
+        } catch (IOException e) {
+            logger.error("Failed to load properties from {}", propertiesFileName);
+            throw new ConfigException("Error loading " + propertiesFileName);
+        }
+
+        this.configuration = new Configuration()
+                .addProperties(properties)
                 .addAnnotatedClass(City.class)
                 .addAnnotatedClass(Country.class)
-                .addAnnotatedClass(CountryLanguage.class)
-                .addProperties(properties)
-                .buildSessionFactory();
+                .addAnnotatedClass(CountryLanguage.class);
+    }
+
+    public SessionFactory buildSessionFactory() {
+        return configuration.buildSessionFactory();
     }
 }

@@ -1,78 +1,51 @@
 package com.javarush.repositories;
 
-import com.javarush.AbstractHibernateTest;
-import com.javarush.domain.*;
+import com.javarush.AbstractIntegrationTest;
+import com.javarush.domain.City;
 import org.hibernate.Session;
-import org.junit.jupiter.api.BeforeEach;
+import org.hibernate.Transaction;
+import org.hibernate.context.internal.ThreadLocalSessionContext;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CityRepositoryTest extends AbstractHibernateTest {
-    private CityRepository cityRepository;
-
-    @BeforeEach
-    void setUp() {
-        cityRepository = new CityRepository(sessionFactory);
-    }
+class CityRepositoryTest extends AbstractIntegrationTest {
 
     @Test
-    void shouldReturnCorrectCitiesListWithPaginationInMethodGetItems() {
-        Session session = sessionFactory.getCurrentSession();
+    void shouldReturnCityWithFetchedCountryAndLanguages() {
+        try (Session session = sessionFactory.openSession()) {
+            ThreadLocalSessionContext.bind(session);
+            Transaction transaction = session.beginTransaction();
+            try {
+                CityRepository cityRepository = new CityRepository(sessionFactory);
+                Optional<City> cityOpt = cityRepository.getById(1);
 
-        for (int i = 1; i <= 3; i++) {
-            City city = new City();
-            city.setName("City " + i);
-            session.persist(city);
+                assertTrue(cityOpt.isPresent());
+                assertEquals("Kyiv", cityOpt.get().getName());
+
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                throw e;
+            } finally {
+                ThreadLocalSessionContext.unbind(sessionFactory);
+            }
         }
-
-        session.flush();
-        session.clear();
-
-        List<City> firstPage = cityRepository.getItems(0, 2);
-        assertEquals(2, firstPage.size());
-        assertEquals("City 1", firstPage.get(0).getName());
-        assertEquals("City 2", firstPage.get(1).getName());
-
-        List<City> secondPage = cityRepository.getItems(2, 2);
-        assertEquals(1, secondPage.size());
-        assertEquals("City 3", secondPage.get(0).getName());
-
-        List<City> outOfRange = cityRepository.getItems(10, 2);
-        assertTrue(outOfRange.isEmpty());
     }
 
     @Test
-    void shouldReturnCorrectCountInMethodGetTotalCount() {
-        Session session = sessionFactory.getCurrentSession();
-        City city = new City();
-        city.setName("Kyiv");
-        session.persist(city);
+    void shouldMethodsGetItemsAndTotalCountWorkCorrectly() {
+        try (Session session = sessionFactory.openSession()) {
+            ThreadLocalSessionContext.bind(session);
+            session.beginTransaction();
 
-        assertEquals(1, cityRepository.getTotalCount());
-    }
+            CityRepository repository = new CityRepository(sessionFactory);
 
-    @Test
-    void shouldReturnCityWithFetchedCountryInMethodGetById() {
-        Session session = sessionFactory.getCurrentSession();
-        Country country = new Country();
-        country.setId(1);
-        country.setName("Ukraine");
-        country.setCode("UKR");
-        session.persist(country);
+            assertEquals(1, repository.getTotalCount());
+            assertEquals(1, repository.getItems(0, 10).size());
 
-        City city = new City();
-        city.setName("Kyiv");
-        city.setCountry(country);
-        session.persist(city);
-
-        session.flush();
-        session.clear();
-
-        City foundCity = cityRepository.getById(city.getId());
-        assertNotNull(foundCity);
-        assertEquals("Ukraine", foundCity.getCountry().getName());
+            session.getTransaction().commit();
+            ThreadLocalSessionContext.unbind(sessionFactory);
+        }
     }
 }

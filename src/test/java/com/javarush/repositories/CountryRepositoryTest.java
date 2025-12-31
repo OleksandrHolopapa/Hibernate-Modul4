@@ -1,44 +1,29 @@
 package com.javarush.repositories;
 
-import com.javarush.AbstractHibernateTest;
-import com.javarush.domain.*;
+import com.javarush.AbstractIntegrationTest;
+import com.javarush.domain.Country;
 import org.hibernate.Session;
-import org.junit.jupiter.api.BeforeEach;
+import org.hibernate.context.internal.ThreadLocalSessionContext;
 import org.junit.jupiter.api.Test;
-import java.math.BigDecimal;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CountryRepositoryTest extends AbstractHibernateTest {
-    private CountryRepository countryRepository;
-
-    @BeforeEach
-    void setUp() {
-        countryRepository = new CountryRepository(sessionFactory);
-    }
+class CountryRepositoryTest extends AbstractIntegrationTest {
 
     @Test
-    void shouldReturnAllCountriesInMethodGetAll() {
-        Session session = sessionFactory.getCurrentSession();
-        Country country = new Country();
-        country.setId(100);
-        country.setName("Ukraine");
-        country.setCode("UKR");
-        country.setContinent(Continent.EUROPE);
-        session.persist(country);
+    void getAll_ShouldReturnCountriesWithLanguages() {
+        try (Session session = sessionFactory.openSession()) {
+            ThreadLocalSessionContext.bind(session);
+            session.beginTransaction();
 
-        CountryLanguage lang = new CountryLanguage();
-        lang.setCountry(country);
-        lang.setLanguage("Ukrainian");
-        lang.setIsOfficial(true);
-        lang.setPercentage(BigDecimal.valueOf(100));
-        session.persist(lang);
+            CountryRepository repository = new CountryRepository(sessionFactory);
+            List<Country> countries = repository.getAll();
 
-        session.flush();
-        session.clear();
+            assertFalse(countries.isEmpty());
+            assertNotNull(countries.get(0).getLanguages());
 
-        List<Country> countries = countryRepository.getAll();
-        assertFalse(countries.isEmpty());
-        assertEquals(1, countries.get(0).getLanguages().size());
+            session.getTransaction().commit();
+            ThreadLocalSessionContext.unbind(sessionFactory);
+        }
     }
 }

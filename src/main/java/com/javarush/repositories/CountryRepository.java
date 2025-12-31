@@ -2,8 +2,6 @@ package com.javarush.repositories;
 
 import com.javarush.domain.Country;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
-
 import java.util.List;
 
 public class CountryRepository {
@@ -14,7 +12,8 @@ public class CountryRepository {
     }
 
     public List<Country> getAll() {
-        Query<Country> query = sessionFactory.getCurrentSession().createQuery("select c from Country c join fetch c.languages", Country.class);
-        return query.list();
+        return sessionFactory.getCurrentSession()
+                .createQuery("select c from Country c join fetch c.languages", Country.class)
+                .list();
     }
 }

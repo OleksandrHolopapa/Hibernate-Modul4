@@ -14,14 +14,11 @@ import java.util.List;
 public class RedisService {
     private final RedisClient redisClient;
     private final ObjectMapper mapper;
-    private final Logger logger = LoggerFactory.getLogger(RedisService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
 
-    public RedisService(RedisClient redisClient) {
+    public RedisService(RedisClient redisClient, ObjectMapper mapper) {
         this.redisClient = redisClient;
-        mapper = new ObjectMapper();
-        try (StatefulRedisConnection<String, String> connection = redisClient.connect()) {
-            System.out.println("\nConnected to Redis\n");
-        }
+        this.mapper = mapper;
     }
 
     public void pushToRedis(List<CityCountry> data) {
@@ -31,8 +28,7 @@ public class RedisService {
                 try {
                     sync.set(String.valueOf(cityCountry.getId()), mapper.writeValueAsString(cityCountry));
                 } catch (JsonProcessingException e) {
-                    logger.error("Error serializing city with ID {}: {}",
-                            cityCountry.getId(), e.getMessage());
+                    logger.error("Error serializing city with ID {}: {}", cityCountry.getId(), e.getMessage());
                 }
             }
         }
@@ -43,10 +39,14 @@ public class RedisService {
             RedisStringCommands<String, String> sync = connection.sync();
             for (Integer id : ids) {
                 String value = sync.get(String.valueOf(id));
-                try {
-                    mapper.readValue(value, CityCountry.class);
-                } catch (JsonProcessingException e) {
-                    logger.error("Error processing JSON for ID {}: {}", id, e.getMessage(), e);
+                if (value != null) {
+                    try {
+                        mapper.readValue(value, CityCountry.class);
+                    } catch (JsonProcessingException e) {
+                        logger.error("Error processing JSON for ID {}: {}", id, e.getMessage());
+                    }
+                } else {
+                    logger.warn("No data found in Redis for ID: {}", id);
                 }
             }
         }

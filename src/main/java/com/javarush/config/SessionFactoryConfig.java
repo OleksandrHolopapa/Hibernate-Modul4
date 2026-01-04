@@ -17,7 +17,8 @@ public class SessionFactoryConfig {
     private final Configuration configuration;
     private static final Logger logger = LoggerFactory.getLogger(SessionFactoryConfig.class);
 
-    public SessionFactoryConfig(String propertiesFileName) {
+    public SessionFactoryConfig(ConfigFile configFile) {
+        String propertiesFileName = configFile.getFileName();
         Properties properties = new Properties();
 
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propertiesFileName)) {

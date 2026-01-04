@@ -15,8 +15,8 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        RedisConfig redisConfig = new RedisConfig(ConfigFile.REDIS.getFileName());
-        SessionFactoryConfig sfConfig = new SessionFactoryConfig(ConfigFile.HIBERNATE.getFileName());
+        RedisConfig redisConfig = new RedisConfig(ConfigFile.REDIS);
+        SessionFactoryConfig sfConfig = new SessionFactoryConfig(ConfigFile.HIBERNATE);
 
         try (SessionFactory sessionFactory = sfConfig.buildSessionFactory();
              RedisClient redisClient = RedisClient.create(RedisURI.create(redisConfig.getHost(), redisConfig.getPort()))) {

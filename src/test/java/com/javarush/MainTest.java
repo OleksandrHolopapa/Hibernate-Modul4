@@ -11,8 +11,8 @@ class MainTest {
     @Test
     void shouldLoadWithoutExceptions() {
         assertDoesNotThrow(() -> {
-            new RedisConfig(ConfigFile.REDIS.getFileName());
-            new SessionFactoryConfig(ConfigFile.HIBERNATE.getFileName());
+            new RedisConfig(ConfigFile.REDIS);
+            new SessionFactoryConfig(ConfigFile.HIBERNATE);
         });
     }
 }

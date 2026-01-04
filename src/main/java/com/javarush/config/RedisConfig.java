@@ -12,7 +12,8 @@ public class RedisConfig {
     private final Properties properties = new Properties();
     private static final Logger logger = LoggerFactory.getLogger(RedisConfig.class);
 
-    public RedisConfig(String propertiesFileName) {
+    public RedisConfig(ConfigFile configFile) {
+        String propertiesFileName = configFile.getFileName();
         try (InputStream inputStream = RedisConfig.class.getClassLoader().getResourceAsStream(propertiesFileName)) {
             if (inputStream == null) {
                 logger.error("Property file {} not found", propertiesFileName);

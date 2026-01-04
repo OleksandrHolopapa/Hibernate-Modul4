@@ -11,7 +11,7 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeAll
     static void init() {
-        SessionFactoryConfig config = new SessionFactoryConfig(ConfigFile.TEST_HIBERNATE.getFileName());
+        SessionFactoryConfig config = new SessionFactoryConfig(ConfigFile.TEST_HIBERNATE);
         sessionFactory = config.buildSessionFactory();
     }
 

@@ -1,0 +1,3 @@
+INSERT INTO world.country (id, code, code_2, name, continent, region, surface_area, population, local_name, government_form) VALUES (1, 'UKR', 'UA', 'Ukraine', 1, 'Eastern Europe', 603500, 41000000, 'Україна', 'Republic');
+INSERT INTO world.country_language (id, country_id, language, is_official, percentage) VALUES (1, 1, 'Ukrainian', 1, 67.8);
+INSERT INTO world.city (id, name, country_id, district, population) VALUES (1, 'Kyiv', 1, 'Kyivska', 2800000);

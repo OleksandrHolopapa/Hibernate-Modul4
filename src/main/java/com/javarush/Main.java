@@ -14,16 +14,16 @@ import org.slf4j.LoggerFactory;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         RedisConfig redisConfig = new RedisConfig(ConfigFile.REDIS);
-        SessionFactoryConfig sfConfig = new SessionFactoryConfig(ConfigFile.HIBERNATE);
+        SessionFactoryConfig sessionFactoryConfig = new SessionFactoryConfig(ConfigFile.HIBERNATE);
 
-        try (SessionFactory sessionFactory = sfConfig.buildSessionFactory();
+        try (SessionFactory sessionFactory = sessionFactoryConfig.buildSessionFactory();
              RedisClient redisClient = RedisClient.create(RedisURI.create(redisConfig.getHost(), redisConfig.getPort()))) {
             Runner runner = RunnerFactory.createRunner(sessionFactory, redisClient);
             runner.run();
         } catch (Exception e) {
-            logger.error("Critical application error: {}", e.getMessage(), e);
+            logger.error("Critical application error: {}", e.getMessage());
         }
     }
 }
